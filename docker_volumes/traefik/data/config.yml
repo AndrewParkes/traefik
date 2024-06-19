@@ -1,0 +1,177 @@
+udp:
+ #region routers 
+  routers:
+    factorioGame:
+      entryPoints:
+        - "udpfactorio"
+      service: factorioGame
+
+#endregion
+#region services
+  services:
+    factorioGame:
+      loadBalancer:
+        servers:
+          - address: "192.168.1.128:34197"
+#endregion
+
+http:
+ #region routers 
+  routers:
+    proxmox:
+      entryPoints:
+        - "https"
+      rule: "Host(`proxmox.local.parkes.zip`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: proxmox
+    unifi:
+      entryPoints:
+        - "https"
+      rule: "Host(`unifi.local.parkes.zip`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: unifi
+    homepage:
+      entryPoints:
+        - "https"
+      rule: "Host(`homepage.local.parkes.zip`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: homepage
+    lychee:
+      entryPoints:
+        - "https"
+      rule: "Host(`lychee.local.parkes.zip`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: lychee
+    pihole:
+      entryPoints:
+        - "https"
+      rule: "Host(`pihole.local.parkes.zip`)"
+      middlewares:
+        - redirectregex-pihole
+        - default-headers
+        - addprefix-pihole
+        - https-redirectscheme
+      tls: {}
+      service: pihole
+    homeassistant:
+      # For Homeassistant config, check: https://www.home-assistant.io/integrations/http/#reverse-proxies
+      # This relies on Homeassistant using http. No certs are needed in the Homeassistant config.
+      entryPoints:
+        - "https"
+      rule: "Host(`ha.local.parkes.zip`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: homeassistant
+    pterodactyl:
+      entryPoints:
+        - "https"
+      rule: "Host(`pterodactyl.local.parkes.zip`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: pterodactyl
+    factorioServer:
+      entryPoints:
+        - "https"
+      rule: "Host(`factorio.local.parkes.zip`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: factorioServer
+#endregion
+#region services
+  services:
+    proxmox:
+      loadBalancer:
+        servers:
+          - url: "https://192.168.1.100:8006"
+        passHostHeader: true
+    unifi:
+      loadBalancer:
+        servers:
+          - url: "https://192.168.1.51:8443"
+        passHostHeader: true
+    homepage:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.1.236:3000"
+        passHostHeader: true
+    lychee:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.1.205:90"
+        passHostHeader: true
+    pihole:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.1.2:80"
+        passHostHeader: true
+    homeassistant:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.1.220:8123"
+        passHostHeader: true
+    pterodactyl:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.1.131:80"
+        passHostHeader: true
+    factorioServer:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.1.128:443"
+        passHostHeader: true
+
+#endregion
+  middlewares:
+    addprefix-pihole:
+      addPrefix:
+        prefix: "/admin"
+    https-redirectscheme:
+      redirectScheme:
+        scheme: https
+        permanent: true
+    redirectregex-pihole:
+      redirectRegex:
+        regex: "/admin/(.*)"
+        replacement: /
+
+    default-headers:
+      headers:
+        frameDeny: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 15552000
+        customFrameOptionsValue: SAMEORIGIN
+        customRequestHeaders:
+          X-Forwarded-Proto: https
+
+    default-whitelist:
+      ipAllowList:
+        sourceRange:
+        - "192.168.1.0/24"
+
+    secured:
+      chain:
+        middlewares:
+        - default-whitelist
+        - default-headers

@@ -1,0 +1,4 @@
+.idea
+.env
+cf_api_token.txt
+acme.json
