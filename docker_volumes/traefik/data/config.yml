@@ -45,15 +45,15 @@ http:
         - https-redirectscheme
       tls: {}
       service: homepage
-    lychee:
+    truenas:
       entryPoints:
         - "https"
-      rule: "Host(`lychee.local.parkes.zip`)"
+      rule: "Host(`truenas.local.parkes.zip`)"
       middlewares:
         - default-headers
         - https-redirectscheme
       tls: {}
-      service: lychee
+      service: truenas
     pihole:
       entryPoints:
         - "https"
@@ -112,10 +112,10 @@ http:
         servers:
           - url: "http://192.168.1.236:3000"
         passHostHeader: true
-    lychee:
+    truenas:
       loadBalancer:
         servers:
-          - url: "http://192.168.1.205:90"
+          - url: "http://192.168.1.124:80"
         passHostHeader: true
     pihole:
       loadBalancer:
